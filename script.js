@@ -19,13 +19,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const compra = listaCompras.find(item => item.codigoProduto === produto.codigoProduto);
                 const quantidadeComprada = compra ? compra.quantidadeComprada : 0;
                 const coletado = compra ? compra.coletado : false;
-
+    
                 let row = productList.insertRow();
                 row.innerHTML = `
-                    <td>${produto.codigoProduto}</td>
-                    <td>${produto.nomeProduto}</td>
-                    <td>${produto.unidade}</td>
-                    <td>${produto.quantidade}</td>
+                    <td class="${coletado ? 'strike-through' : ''}">${produto.codigoProduto}</td>
+                    <td class="${coletado ? 'strike-through' : ''}">${produto.nomeProduto}</td>
+                    <td class="${coletado ? 'strike-through' : ''}">${produto.unidade}</td>
+                    <td class="${coletado ? 'strike-through' : ''}">${produto.quantidade}</td>
                     <td><input type="number" value="${quantidadeComprada}" data-index="${index}" class="quantidadeComprada"></td>
                     <td><input type="checkbox" ${coletado ? "checked" : ""} disabled data-index="${index}"></td>
                     <td style="padding: 0;">
@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     };
+    
 
     const deleteProduct = (index) => {
         const produto = listaProdutos[index];
@@ -92,7 +93,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         alert("Lista enviada com sucesso!");
                         listaCompras = [];
                         localStorage.removeItem("listaCompras");
+                        window.location.reload()
+
                         renderProductList();
+
                     }
                 });
             });
@@ -145,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             saveToLocalStorage();
             productForm.reset();
-            window.location.href = "lista.html";
+            alert("Produto adicionado com sucesso!")
         });
 
         preencheFormulario();

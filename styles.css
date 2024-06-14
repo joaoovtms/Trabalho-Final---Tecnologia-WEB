@@ -9,6 +9,11 @@ body {
     display: grid;
 }
 
+.strike-through {
+    text-decoration: line-through;
+}
+
+
 form {
     display: flex;
     flex-direction: column;
