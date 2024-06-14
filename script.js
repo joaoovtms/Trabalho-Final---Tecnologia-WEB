@@ -16,14 +16,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (productList) {
             productList.innerHTML = "";
             listaProdutos.filter(produto => produto.ativo).forEach((produto, index) => {
+                const compra = listaCompras.find(item => item.codigoProduto === produto.codigoProduto);
+                const quantidadeComprada = compra ? compra.quantidadeComprada : 0;
+                const coletado = compra ? compra.coletado : false;
+
                 let row = productList.insertRow();
                 row.innerHTML = `
                     <td>${produto.codigoProduto}</td>
                     <td>${produto.nomeProduto}</td>
                     <td>${produto.unidade}</td>
                     <td>${produto.quantidade}</td>
-                    <td><input type="number" value="${produto.quantidadeComprada || 0}" data-index="${index}" class="quantidadeComprada"></td>
-                    <td><input type="checkbox" ${produto.quantidadeComprada >= produto.quantidade ? "checked" : ""} disabled data-index="${index}" class="produtoColetado"></td>
+                    <td><input type="number" value="${quantidadeComprada}" data-index="${index}" class="quantidadeComprada"></td>
+                    <td><input type="checkbox" ${coletado ? "checked" : ""} disabled data-index="${index}"></td>
                     <td style="padding: 0;">
                         <div style="display: flex; width: 100%; height: 100%; justify-content: space-between;">
                             <button class="editar" data-index="${index}" style="flex: 1; margin: 0 5px;">Editar</button>
@@ -36,7 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const deleteProduct = (index) => {
+        const produto = listaProdutos[index];
         listaProdutos.splice(index, 1);
+        listaCompras = listaCompras.filter(item => item.codigoProduto !== produto.codigoProduto);
         saveToLocalStorage();
         renderProductList();
     };
@@ -44,16 +50,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (productListElement) {
         productListElement.addEventListener("change", (event) => {
             const index = event.target.getAttribute("data-index");
-            if (event.target.type === "checkbox" && !event.target.classList.contains("produtoColetado")) {
-                listaProdutos[index].coletado = event.target.checked;
-            } else if (event.target.classList.contains("quantidadeComprada")) {
-                listaProdutos[index].quantidadeComprada = parseInt(event.target.value);
-                if (listaProdutos[index].quantidadeComprada >= listaProdutos[index].quantidade) {
-                    const checkbox = productListElement.querySelector(`input[type="checkbox"][data-index="${index}"]`);
-                    if (checkbox) checkbox.checked = true;
+            if (event.target.classList.contains("quantidadeComprada")) {
+                const produto = listaProdutos[index];
+                const quantidadeComprada = parseInt(event.target.value);
+
+                let compra = listaCompras.find(item => item.codigoProduto === produto.codigoProduto);
+                if (!compra) {
+                    compra = { codigoProduto: produto.codigoProduto, quantidadeComprada: 0, coletado: false };
+                    listaCompras.push(compra);
                 }
+                compra.quantidadeComprada = quantidadeComprada;
+                compra.coletado = quantidadeComprada >= produto.quantidade;
+
+                saveToLocalStorage();
+                renderProductList();
             }
-            saveToLocalStorage();
         });
 
         productListElement.addEventListener("click", (event) => {
@@ -68,31 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Adiciona evento blur para salvar quantidade comprada
-        productListElement.addEventListener("blur", (event) => {
-            if (event.target.classList.contains("quantidadeComprada")) {
-                const index = event.target.getAttribute("data-index");
-                const quantidadeComprada = parseInt(event.target.value);
-                listaProdutos[index].quantidadeComprada = quantidadeComprada;
-        
-                // Verifica se quantidade comprada é maior ou igual à quantidade necessária
-                if (quantidadeComprada >= listaProdutos[index].quantidade) {
-                    listaProdutos[index].coletado = true;
-                } else {
-                    listaProdutos[index].coletado = false;
-                }
-        
-                // Atualiza o estado do checkbox
-                const checkbox = productListElement.querySelector(`input[type="checkbox"][data-index="${index}"]`);
-                if (checkbox) {
-                    checkbox.checked = listaProdutos[index].coletado;
-                }
-        
-                // Salva no localStorage
-                saveToLocalStorage();
-            }
-        }, true);
-
         if (enviarServidorBtn) {
             enviarServidorBtn.addEventListener("click", () => {
                 fetch("https://6669f4e02e964a6dfed73731.mockapi.io/compra", {
@@ -100,24 +86,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify(listaProdutos)
+                    body: JSON.stringify(listaCompras)
                 }).then(response => {
                     if (response.ok) {
                         alert("Lista enviada com sucesso!");
-                        limparLocalStorage(); // Chamando a função para limpar o localStorage
-                        renderProductList(); // Renderizando a lista após limpar o localStorage
+                        listaCompras = [];
+                        localStorage.removeItem("listaCompras");
+                        renderProductList();
                     }
                 });
             });
         }
-        
-        // Função para limpar o localStorage
-        const limparLocalStorage = () => {
-            localStorage.removeItem("listaProdutos");
-            localStorage.removeItem("listaCompras");
-            listaProdutos = [];
-            listaCompras = [];
-        };
 
         renderProductList();
     }
@@ -131,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("quantidade").value = produtoEditado.quantidade;
             document.getElementById("codigoBarra").value = produtoEditado.codigoBarra;
             document.getElementById("ativo").checked = produtoEditado.ativo;
-            document.getElementById("codigoProduto").disabled = true; // Desabilita o campo códigoProduto
             localStorage.removeItem("produtoEditado");
         }
     };
@@ -156,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const codigoBarra = document.getElementById("codigoBarra").value;
             const ativo = document.getElementById("ativo").checked;
 
-            const novoProduto = { codigoProduto, nomeProduto, unidade, quantidade, codigoBarra, ativo, quantidadeComprada: 0, coletado: false };
+            const novoProduto = { codigoProduto, nomeProduto, unidade, quantidade, codigoBarra, ativo };
 
             if (document.getElementById("codigoProduto").value) {
                 const index = listaProdutos.findIndex(p => p.codigoProduto == codigoProduto);
