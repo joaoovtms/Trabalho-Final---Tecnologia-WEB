@@ -88,12 +88,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (enviarServidorBtn) {
             enviarServidorBtn.addEventListener("click", () => {
+
+                console.log('listaProdutos', listaProdutos)
+                const payload = listaProdutos.map((produto, index) => {
+                    const compra = listaCompras.find(item => item.codigoProduto === produto.codigoProduto);
+                    const quantidadeComprada = compra ? compra.quantidadeComprada : 0;
+                    const coletado = compra ? compra.coletado : false;
+
+            
+                    return {
+                        codigoProduto: produto.codigoProduto,
+                        codCompra: index,
+                        nomeProduto: produto.nomeProduto,
+                        unidade: produto.unidade,
+                        quantidade: produto.quantidade,
+                        codigoBarra: produto.codigoBarra,
+                        ativo: produto.ativo,
+                        quantidadeComprada: quantidadeComprada,
+                    };
+                });
+
+                console.log(JSON.stringify(payload))
+
                 fetch("https://6669f4e02e964a6dfed73731.mockapi.io/compra", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify(listaCompras)
+                    body: JSON.stringify(payload)
                 }).then(response => {
                     if (response.ok) {
                         alert("Lista enviada com sucesso!");
