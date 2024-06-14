@@ -4,6 +4,7 @@ body {
     justify-content: center;
     align-content: center;
     text-align: center;
+    align-self: center;
     align-items: center;
     margin: auto;
     display: grid;
