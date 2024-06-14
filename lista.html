@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Lista de Compras</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Adicione estas regras CSS para estilizar o botão desabilitado */
+        #enviarServidor:disabled {
+            background-color: grey;
+            cursor: not-allowed;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <h1>Lista de Compras</h1>
@@ -20,10 +28,10 @@
             </tr>
         </thead>
         <tbody>
-            
+
         </tbody>
     </table>
-    <button id="enviarServidor">Enviar para o Servidor</button>
+    <button id="enviarServidor" disabled>Enviar para o Servidor</button>
     <a href="cadastro.html">Cadastrar Novo Produto</a>
     <script src="script.js"></script>
 </body>

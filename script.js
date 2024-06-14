@@ -15,11 +15,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const renderProductList = () => {
         if (productList) {
             productList.innerHTML = "";
+            let allCollected = true;
             listaProdutos.filter(produto => produto.ativo).forEach((produto, index) => {
                 const compra = listaCompras.find(item => item.codigoProduto === produto.codigoProduto);
                 const quantidadeComprada = compra ? compra.quantidadeComprada : 0;
                 const coletado = compra ? compra.coletado : false;
-    
+                
+                if (!coletado) {
+                    allCollected = false;
+                }
+
                 let row = productList.insertRow();
                 row.innerHTML = `
                     <td class="${coletado ? 'strike-through' : ''}">${produto.codigoProduto}</td>
@@ -36,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                 `;
             });
+            enviarServidorBtn.disabled = !allCollected;
         }
     };
     
@@ -93,6 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         alert("Lista enviada com sucesso!");
                         listaCompras = [];
                         localStorage.removeItem("listaCompras");
+                        localStorage.removeItem("listaProdutos");
+
                         window.location.reload()
 
                         renderProductList();
