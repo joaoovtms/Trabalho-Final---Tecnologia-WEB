@@ -20,14 +20,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const compra = listaCompras.find(item => item.codigoProduto === produto.codigoProduto);
                 const quantidadeComprada = compra ? compra.quantidadeComprada : 0;
                 const coletado = compra ? compra.coletado : false;
-                
+
                 if (!coletado) {
                     allCollected = false;
                 }
-
                 let row = productList.insertRow();
                 row.innerHTML = `
-                    <td class="${coletado ? 'strike-through' : ''}">${produto.codigoProduto}</td>
+                    <td class="${coletado ? 'strike-through' : ''}">${produto.codigoProduto }</td>
                     <td class="${coletado ? 'strike-through' : ''}">${produto.nomeProduto}</td>
                     <td class="${coletado ? 'strike-through' : ''}">${produto.unidade}</td>
                     <td class="${coletado ? 'strike-through' : ''}">${produto.quantidade}</td>
@@ -44,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
             enviarServidorBtn.disabled = !allCollected;
         }
     };
-    
+
 
     const deleteProduct = (index) => {
         const produto = listaProdutos[index];
@@ -89,13 +88,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (enviarServidorBtn) {
             enviarServidorBtn.addEventListener("click", () => {
 
-                console.log('listaProdutos', listaProdutos)
                 const payload = listaProdutos.map((produto, index) => {
                     const compra = listaCompras.find(item => item.codigoProduto === produto.codigoProduto);
                     const quantidadeComprada = compra ? compra.quantidadeComprada : 0;
-                    const coletado = compra ? compra.coletado : false;
 
-            
+
                     return {
                         codigoProduto: produto.codigoProduto,
                         codCompra: index,
@@ -108,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     };
                 });
 
-                console.log(JSON.stringify(payload))
 
                 fetch("https://6669f4e02e964a6dfed73731.mockapi.io/compra", {
                     method: "POST",
@@ -121,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         alert("Lista enviada com sucesso!");
                         listaCompras = [];
                         localStorage.removeItem("listaCompras");
-                        localStorage.removeItem("listaProdutos");
 
                         window.location.reload()
 
@@ -131,7 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
         }
-
         renderProductList();
     }
 
@@ -176,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 addProduct(novoProduto);
             }
-            
+
             saveToLocalStorage();
             productForm.reset();
             alert("Produto adicionado com sucesso!")
